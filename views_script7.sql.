@@ -1,0 +1,58 @@
+-- SQL DEVELOPER INTERNSHIP - TASK 7
+-- Objective: Learn to create and use views.
+
+USE ecommerce_db_task7;
+
+-- =================================================================
+-- EXAMPLE 1: CREATING A VIEW FOR SIMPLICITY / ABSTRACTION
+-- =================================================================
+
+-- Let's create a complex query that joins two tables and calculates the total spent by each customer.
+-- This query is useful, but we don't want to type it every time.
+-- So, we save it as a view.
+CREATE OR REPLACE VIEW CustomerSpending AS
+SELECT
+    C.CustomerID,
+    C.FirstName,
+    C.LastName,
+    SUM(O.TotalAmount) AS TotalSpent
+FROM Customers AS C
+JOIN Orders AS O ON C.CustomerID = O.CustomerID
+GROUP BY C.CustomerID, C.FirstName, C.LastName;
+
+-- USAGE EXAMPLE 1:
+-- Now, we can query this view just like a regular table. It's much simpler!
+SELECT * FROM CustomerSpending;
+
+-- We can even add a WHERE clause to the view.
+SELECT FirstName, TotalSpent FROM CustomerSpending WHERE TotalSpent > 1000;
+
+
+-- =================================================================
+-- EXAMPLE 2: CREATING A VIEW FOR SECURITY
+-- =================================================================
+
+-- Let's say we have an intern who needs to see product names and prices,
+-- but we don't want them to see sensitive data like the StockQuantity.
+-- We can create a view that only exposes the "safe" columns.
+CREATE OR REPLACE VIEW PublicProductInfo AS
+SELECT
+    ProductName,
+    Price
+FROM Products;
+
+-- USAGE EXAMPLE 2:
+-- Now, if we give the intern access only to this view, they can get the pricing info...
+SELECT * FROM PublicProductInfo;
+
+-- ...but they have no way of seeing the hidden StockQuantity column.
+-- The following query would fail if they didn't have access to the original 'Products' table:
+-- SELECT ProductName, StockQuantity FROM Products;
+
+
+-- =================================================================
+-- EXAMPLE 3: DROPPING (DELETING) A VIEW
+-- =================================================================
+
+-- If a view is no longer needed, you can remove it without affecting the underlying tables.
+DROP VIEW IF EXISTS PublicProductInfo;
